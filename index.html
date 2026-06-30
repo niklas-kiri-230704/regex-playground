@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex Playground</title>
+<style>
+  :root{--bg:#0f1117;--bg-elev:#181b24;--bg-elev2:#1f2330;--border:#2a2f3d;--text:#e6e8ee;--text-dim:#9aa1b1;--accent:#6ea8fe;--accent-dim:#34406b;--good:#3fb950;--danger:#f85149;--code-bg:#0b0d13;--radius:10px;}
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);min-height:100vh;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  button{font:inherit;cursor:pointer;} input,textarea,select{font:inherit;}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(15,17,23,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 20px;}
+  .bar{display:flex;gap:12px;align-items:center;max-width:1000px;margin:0 auto;flex-wrap:wrap;}
+  .logo{font-weight:700;font-size:18px;letter-spacing:.3px;}
+  .logo span{color:var(--accent);}
+  .spacer{flex:1;}
+
+  main{max-width:1000px;margin:0 auto;padding:20px;}
+  .card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:18px;}
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim);margin:0 0 12px;}
+  label.lbl{display:block;font-size:13px;color:var(--text-dim);margin:0 0 6px;}
+
+  .mono{font-family:"SF Mono","Cascadia Code",Consolas,monospace;}
+  input.txt,textarea{width:100%;background:var(--bg-elev2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;}
+  input.txt:focus,textarea:focus{outline:none;border-color:var(--accent);}
+  textarea{resize:vertical;min-height:120px;font-family:"SF Mono","Cascadia Code",Consolas,monospace;font-size:13px;}
+  .patrow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+  .patrow .delim{display:flex;align-items:center;color:var(--text-dim);font-size:20px;padding:0 2px;}
+  .patrow .pat{flex:1;min-width:200px;}
+  input.txt.pat{font-family:"SF Mono","Cascadia Code",Consolas,monospace;font-size:14px;}
+  input.txt.flagbox{width:90px;font-family:"SF Mono","Cascadia Code",Consolas,monospace;text-align:center;}
+
+  .flags{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;}
+  .chk{display:flex;gap:6px;align-items:center;color:var(--text-dim);font-size:13px;}
+  .chk code{color:var(--text);}
+
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;}
+  .btn{background:var(--bg-elev2);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:var(--radius);white-space:nowrap;}
+  .btn:hover{border-color:var(--accent);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#08101f;font-weight:600;}
+  .btn.sm{padding:6px 10px;font-size:13px;}
+
+  .err{color:var(--danger);font-size:13px;margin-top:8px;font-family:"SF Mono",Consolas,monospace;min-height:18px;}
+  .stat{color:var(--text-dim);font-size:13px;}
+  .stat b{color:var(--accent);}
+
+  .highlight{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:"SF Mono","Cascadia Code",Consolas,monospace;font-size:13px;white-space:pre-wrap;word-break:break-word;min-height:44px;line-height:1.6;}
+  mark.m{background:var(--accent-dim);color:var(--text);border-radius:3px;padding:0 1px;}
+  mark.m.alt{background:#3a5a2e;}
+
+  table.matches{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;}
+  table.matches th{text-align:left;color:var(--text-dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px;padding:6px 8px;border-bottom:1px solid var(--border);}
+  table.matches td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top;font-family:"SF Mono",Consolas,monospace;word-break:break-word;}
+  table.matches td.idx{color:var(--text-dim);white-space:nowrap;}
+  .grp{display:block;}
+  .grp .gn{color:var(--accent);}
+  .grp .gv{color:#7ee787;}
+  .empty{color:var(--text-dim);font-size:13px;padding:8px 0;}
+
+  .out{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:"SF Mono","Cascadia Code",Consolas,monospace;font-size:13px;white-space:pre-wrap;word-break:break-word;min-height:44px;margin-top:10px;}
+
+  details.ref{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);padding:0;margin-bottom:18px;}
+  details.ref>summary{cursor:pointer;padding:14px 16px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim);list-style:none;}
+  details.ref>summary::-webkit-details-marker{display:none;}
+  details.ref>summary::before{content:"▸ ";color:var(--accent);}
+  details.ref[open]>summary::before{content:"▾ ";}
+  .ref-body{padding:0 16px 16px;}
+  .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:640px){.ref-grid{grid-template-columns:1fr;}}
+  .ref-grid h3{font-size:12px;color:var(--accent);margin:0 0 6px;text-transform:uppercase;letter-spacing:.4px;}
+  .ref-grid dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;}
+  .ref-grid dt{font-family:"SF Mono",Consolas,monospace;color:#7ee787;font-size:13px;}
+  .ref-grid dd{margin:0;color:var(--text-dim);font-size:13px;}
+
+  .lib{display:flex;flex-direction:column;gap:8px;}
+  .lib-item{display:flex;gap:8px;align-items:center;background:var(--bg-elev2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;flex-wrap:wrap;}
+  .lib-item .name{font-weight:600;}
+  .lib-item .meta{color:var(--text-dim);font-size:12px;font-family:"SF Mono",Consolas,monospace;}
+  .lib-item .spacer{flex:1;}
+  footer{text-align:center;color:var(--text-dim);font-size:12px;padding:24px;}
+</style>
+</head>
+<body>
+<header><div class="bar"><div class="logo">🔤 Regex<span>Lab</span></div><div class="spacer"></div><span class="stat"><b id="count">0</b> matches</span></div></header>
+
+<main>
+  <div class="card">
+    <h2 class="sec">Pattern</h2>
+    <div class="patrow">
+      <span class="delim">/</span>
+      <input class="txt pat mono" id="pattern" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="\b\w+@\w+\.\w+\b">
+      <span class="delim">/</span>
+      <input class="txt flagbox" id="flags" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="gim">
+    </div>
+    <div class="flags" id="flagChecks">
+      <label class="chk"><input type="checkbox" data-flag="g"> <code>g</code> global</label>
+      <label class="chk"><input type="checkbox" data-flag="i"> <code>i</code> ignore case</label>
+      <label class="chk"><input type="checkbox" data-flag="m"> <code>m</code> multiline</label>
+      <label class="chk"><input type="checkbox" data-flag="s"> <code>s</code> dotall</label>
+      <label class="chk"><input type="checkbox" data-flag="u"> <code>u</code> unicode</label>
+      <label class="chk"><input type="checkbox" data-flag="y"> <code>y</code> sticky</label>
+    </div>
+    <div class="err" id="error"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="sec">Test string</h2>
+    <textarea id="testText" spellcheck="false" placeholder="Type or paste text to test against the pattern…"></textarea>
+    <h2 class="sec" style="margin-top:16px;">Highlighted matches</h2>
+    <div class="highlight" id="highlight"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="sec">Matches</h2>
+    <div id="matchList"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="sec">Replace</h2>
+    <label class="lbl">Replacement string (supports <code>$1</code>, <code>$&lt;name&gt;</code>, <code>$&amp;</code>)</label>
+    <input class="txt mono" id="replacement" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="[$&]">
+    <div class="out" id="replaceOut"></div>
+  </div>
+
+  <details class="ref">
+    <summary>Cheat sheet</summary>
+    <div class="ref-body">
+      <div class="ref-grid">
+        <div>
+          <h3>Character classes</h3>
+          <dl>
+            <dt>.</dt><dd>any char (except newline)</dd>
+            <dt>\d \D</dt><dd>digit / non-digit</dd>
+            <dt>\w \W</dt><dd>word char / non-word</dd>
+            <dt>\s \S</dt><dd>whitespace / non-ws</dd>
+            <dt>[abc]</dt><dd>any of a, b, c</dd>
+            <dt>[^abc]</dt><dd>none of a, b, c</dd>
+            <dt>[a-z]</dt><dd>range</dd>
+          </dl>
+          <h3 style="margin-top:14px;">Anchors</h3>
+          <dl>
+            <dt>^ $</dt><dd>start / end (of line with m)</dd>
+            <dt>\b \B</dt><dd>word / non-word boundary</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Quantifiers</h3>
+          <dl>
+            <dt>* + ?</dt><dd>0+, 1+, 0 or 1</dd>
+            <dt>{n} {n,} {n,m}</dt><dd>exactly / at least / range</dd>
+            <dt>*? +? ??</dt><dd>lazy (non-greedy)</dd>
+          </dl>
+          <h3 style="margin-top:14px;">Groups &amp; lookaround</h3>
+          <dl>
+            <dt>(…)</dt><dd>capture group</dd>
+            <dt>(?:…)</dt><dd>non-capturing</dd>
+            <dt>(?&lt;name&gt;…)</dt><dd>named group</dd>
+            <dt>a|b</dt><dd>alternation</dd>
+            <dt>(?=…) (?!…)</dt><dd>look-ahead pos / neg</dd>
+            <dt>(?&lt;=…) (?&lt;!…)</dt><dd>look-behind pos / neg</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="card">
+    <h2 class="sec">Pattern library</h2>
+    <div class="row">
+      <input class="txt" id="saveName" style="flex:1;min-width:160px;" placeholder="Name this pattern…">
+      <button class="btn primary sm" id="saveBtn">Save current</button>
+    </div>
+    <div class="lib" id="library"></div>
+  </div>
+</main>
+
+<footer>Regex Playground — all local, nothing leaves your browser.</footer>
+
+<script>
+'use strict';
+(function () {
+  var LS_SESSION = 'regexlab.session';
+  var LS_LIBRARY = 'regexlab.library';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var patternEl = $('pattern');
+  var flagsEl = $('flags');
+  var testEl = $('testText');
+  var replacementEl = $('replacement');
+  var errorEl = $('error');
+  var highlightEl = $('highlight');
+  var matchListEl = $('matchList');
+  var replaceOutEl = $('replaceOut');
+  var countEl = $('count');
+  var flagChecksEl = $('flagChecks');
+  var libraryEl = $('library');
+  var saveNameEl = $('saveName');
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function load(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw == null ? fallback : JSON.parse(raw);
+    } catch (e) { return fallback; }
+  }
+  function save(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+
+  // ---- session restore ----
+  var session = load(LS_SESSION, null);
+  if (session && typeof session === 'object') {
+    patternEl.value = session.pattern || '';
+    flagsEl.value = session.flags || '';
+    testEl.value = session.test || '';
+    replacementEl.value = session.replacement || '';
+  }
+  if (!flagsEl.value && !session) { flagsEl.value = 'g'; }
+
+  // ---- flag checkboxes <-> flags input ----
+  var flagBoxes = flagChecksEl.querySelectorAll('input[data-flag]');
+
+  function syncChecksFromInput() {
+    var f = flagsEl.value;
+    flagBoxes.forEach(function (b) { b.checked = f.indexOf(b.getAttribute('data-flag')) !== -1; });
+  }
+  function syncInputFromChecks() {
+    var order = ['g', 'i', 'm', 's', 'u', 'y'];
+    var out = '';
+    var set = {};
+    flagBoxes.forEach(function (b) { if (b.checked) set[b.getAttribute('data-flag')] = true; });
+    order.forEach(function (f) { if (set[f]) out += f; });
+    flagsEl.value = out;
+  }
+
+  flagBoxes.forEach(function (b) {
+    b.addEventListener('change', function () { syncInputFromChecks(); run(); });
+  });
+  syncChecksFromInput();
+
+  // ---- core evaluation ----
+  function persistSession() {
+    save(LS_SESSION, {
+      pattern: patternEl.value,
+      flags: flagsEl.value,
+      test: testEl.value,
+      replacement: replacementEl.value
+    });
+  }
+
+  function buildRegex() {
+    // Throws on invalid pattern/flags.
+    return new RegExp(patternEl.value, flagsEl.value);
+  }
+
+  function collectMatches(re, text) {
+    var matches = [];
+    if (patternEl.value === '') return matches;
+    if (re.global || re.sticky) {
+      re.lastIndex = 0;
+      var m;
+      var guard = 0;
+      while ((m = re.exec(text)) !== null) {
+        matches.push(m);
+        if (m.index === re.lastIndex) { re.lastIndex++; } // zero-length guard
+        if (++guard > 1000000) break;
+      }
+    } else {
+      var single = re.exec(text);
+      if (single) matches.push(single);
+    }
+    return matches;
+  }
+
+  function renderHighlight(matches, text) {
+    if (text === '') { highlightEl.innerHTML = '<span style="color:var(--text-dim)">(empty)</span>'; return; }
+    if (!matches.length) { highlightEl.textContent = text; return; }
+    var html = '';
+    var cursor = 0;
+    var alt = false;
+    for (var i = 0; i < matches.length; i++) {
+      var m = matches[i];
+      var start = m.index;
+      var end = start + m[0].length;
+      if (start < cursor) continue; // overlap safety
+      html += escapeHtml(text.slice(cursor, start));
+      var cls = 'm' + (alt ? ' alt' : '');
+      var content = m[0].length ? escapeHtml(m[0]) : '​';
+      html += '<mark class="' + cls + '">' + content + '</mark>';
+      cursor = end;
+      alt = !alt;
+    }
+    html += escapeHtml(text.slice(cursor));
+    highlightEl.innerHTML = html;
+  }
+
+  function renderMatchList(matches) {
+    if (!matches.length) { matchListEl.innerHTML = '<div class="empty">No matches.</div>'; return; }
+    var rows = '';
+    for (var i = 0; i < matches.length; i++) {
+      var m = matches[i];
+      var groups = '';
+      for (var g = 1; g < m.length; g++) {
+        var val = m[g] === undefined ? '<span style="color:var(--text-dim)">undefined</span>' : escapeHtml(m[g]);
+        groups += '<span class="grp"><span class="gn">$' + g + '</span> <span class="gv">' + val + '</span></span>';
+      }
+      if (m.groups) {
+        for (var name in m.groups) {
+          if (Object.prototype.hasOwnProperty.call(m.groups, name)) {
+            var nv = m.groups[name] === undefined ? '<span style="color:var(--text-dim)">undefined</span>' : escapeHtml(m.groups[name]);
+            groups += '<span class="grp"><span class="gn">&lt;' + escapeHtml(name) + '&gt;</span> <span class="gv">' + nv + '</span></span>';
+          }
+        }
+      }
+      if (!groups) groups = '<span style="color:var(--text-dim)">—</span>';
+      var full = m[0].length ? escapeHtml(m[0]) : '<span style="color:var(--text-dim)">(empty match)</span>';
+      rows += '<tr><td class="idx">' + m.index + '</td><td>' + full + '</td><td>' + groups + '</td></tr>';
+    }
+    matchListEl.innerHTML =
+      '<table class="matches"><thead><tr><th>Index</th><th>Match</th><th>Groups</th></tr></thead><tbody>' +
+      rows + '</tbody></table>';
+  }
+
+  function renderReplace(re, text) {
+    if (patternEl.value === '') { replaceOutEl.textContent = ''; return; }
+    try {
+      replaceOutEl.textContent = text.replace(re, replacementEl.value);
+    } catch (e) {
+      replaceOutEl.textContent = '';
+    }
+  }
+
+  function run() {
+    persistSession();
+    var text = testEl.value;
+    errorEl.textContent = '';
+
+    if (patternEl.value === '') {
+      countEl.textContent = '0';
+      highlightEl.textContent = text;
+      matchListEl.innerHTML = '<div class="empty">Enter a pattern to begin.</div>';
+      replaceOutEl.textContent = '';
+      return;
+    }
+
+    var re;
+    try {
+      re = buildRegex();
+    } catch (e) {
+      errorEl.textContent = '⚠ ' + e.message;
+      countEl.textContent = '0';
+      highlightEl.textContent = text;
+      matchListEl.innerHTML = '<div class="empty">Fix the pattern to see matches.</div>';
+      replaceOutEl.textContent = '';
+      return;
+    }
+
+    var matches = collectMatches(re, text);
+    countEl.textContent = String(matches.length);
+    renderHighlight(matches, text);
+    renderMatchList(matches);
+    // fresh regex for replace so lastIndex state is clean
+    try { renderReplace(new RegExp(patternEl.value, flagsEl.value), text); }
+    catch (e) { replaceOutEl.textContent = ''; }
+  }
+
+  // ---- debounce ----
+  var timer = null;
+  function debouncedRun() {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(run, 180);
+  }
+
+  patternEl.addEventListener('input', debouncedRun);
+  testEl.addEventListener('input', debouncedRun);
+  replacementEl.addEventListener('input', debouncedRun);
+  flagsEl.addEventListener('input', function () { syncChecksFromInput(); debouncedRun(); });
+
+  // ---- pattern library ----
+  function getLibrary() {
+    var lib = load(LS_LIBRARY, []);
+    return Array.isArray(lib) ? lib : [];
+  }
+
+  function renderLibrary() {
+    var lib = getLibrary();
+    if (!lib.length) { libraryEl.innerHTML = '<div class="empty">No saved patterns yet.</div>'; return; }
+    libraryEl.innerHTML = '';
+    lib.forEach(function (entry, idx) {
+      var item = document.createElement('div');
+      item.className = 'lib-item';
+      var name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = entry.name;
+      var meta = document.createElement('span');
+      meta.className = 'meta';
+      meta.textContent = '/' + entry.pattern + '/' + (entry.flags || '');
+      var spacer = document.createElement('span');
+      spacer.className = 'spacer';
+      var loadBtn = document.createElement('button');
+      loadBtn.className = 'btn sm';
+      loadBtn.textContent = 'Load';
+      loadBtn.addEventListener('click', function () {
+        patternEl.value = entry.pattern || '';
+        flagsEl.value = entry.flags || '';
+        testEl.value = entry.test || '';
+        syncChecksFromInput();
+        run();
+      });
+      var delBtn = document.createElement('button');
+      delBtn.className = 'btn sm';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', function () {
+        var cur = getLibrary();
+        cur.splice(idx, 1);
+        save(LS_LIBRARY, cur);
+        renderLibrary();
+      });
+      item.appendChild(name);
+      item.appendChild(meta);
+      item.appendChild(spacer);
+      item.appendChild(loadBtn);
+      item.appendChild(delBtn);
+      libraryEl.appendChild(item);
+    });
+  }
+
+  $('saveBtn').addEventListener('click', function () {
+    var name = saveNameEl.value.trim();
+    if (!name) { saveNameEl.focus(); return; }
+    if (patternEl.value === '') { patternEl.focus(); return; }
+    var lib = getLibrary();
+    var entry = { name: name, pattern: patternEl.value, flags: flagsEl.value, test: testEl.value };
+    var existing = -1;
+    for (var i = 0; i < lib.length; i++) { if (lib[i].name === name) { existing = i; break; } }
+    if (existing >= 0) lib[existing] = entry; else lib.push(entry);
+    save(LS_LIBRARY, lib);
+    saveNameEl.value = '';
+    renderLibrary();
+  });
+
+  saveNameEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('saveBtn').click();
+  });
+
+  // ---- init ----
+  renderLibrary();
+  run();
+})();
+</script>
+</body>
+</html>

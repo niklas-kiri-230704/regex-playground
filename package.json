@@ -1,0 +1,10 @@
+{
+  "name": "regex",
+  "version": "1.0.0",
+  "description": "Self-contained regex playground (single-file, localStorage, no deps)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "private": true
+}
