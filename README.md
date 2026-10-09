@@ -14,9 +14,11 @@ A live regular-expression tester that runs entirely in the browser.
 
 ## In the homelab
 
-Runs as the `regex` PM2 app on port 2090 and appears as a tile on the landing
-hub. Reachable behind the gateway at `/regex/`. `server.js` simply serves
-`index.html` — there is nothing to configure.
+Served on port 2090 by the shared `statics` process — not as a PM2 app of its
+own. Seventeen single-file apps each having their own Node process cost ~33MB apiece, which is what got Termux OOM-killed on the phone; one process now serves them all. Appears as a tile on the landing hub and is reachable behind the
+gateway at `/regex/`. Nothing to configure.
+
+`server.js` here is still what runs the app standalone (`npm start`) and on GitHub Pages; it is simply not what serves it on the phone.
 
 ## Run locally
 
